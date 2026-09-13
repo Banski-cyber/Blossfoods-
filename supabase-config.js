@@ -9,7 +9,7 @@
    Row Level Security policies in schema.sql allow.
    ============================================================ */
 
-const SUPABASE_URL = 'https://dvklfbdncyoxwhxsfppn.supabase.co/rest/v1/';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_dCxVm6mmTRJ-awe2FCsWCg_6OPO6xcy';
+const SUPABASE_URL = 'https://YOUR-PROJECT-REF.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'YOUR-PUBLISHABLE-OR-ANON-KEY';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);

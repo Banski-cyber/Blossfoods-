@@ -110,9 +110,22 @@
         }
 
         (async () => {
-            const ok = await initApp();
-            if (!ok) return; // already redirected to entry.html
-            displayOrder();
+            try {
+                const ok = await initApp();
+                if (!ok) return; // already redirected to entry.html
+                displayOrder();
+            } catch (err) {
+                console.error(err);
+                const container = document.querySelector('.checkout-wrapper') || document.body;
+                const box = document.createElement('div');
+                box.style.padding = '20px 5%';
+                box.style.textAlign = 'center';
+                box.style.color = '#ff8a8a';
+                box.style.fontSize = '0.85rem';
+                box.style.whiteSpace = 'pre-wrap';
+                box.textContent = 'Error loading checkout:\n' + (err && err.message ? err.message : String(err));
+                container.prepend(box);
+            }
         })();
     </script>
 </body>

@@ -65,14 +65,23 @@
         <button onclick="document.getElementById('admin-panel').style.display='none'" style="color:white; background:none; border:none; margin-left:20px; cursor:pointer;">Exit</button>
     </div>
 
+    <div id="error-msg" style="display:none; padding:20px 5%; text-align:center; color:#ff8a8a; font-size:0.85rem; white-space:pre-wrap;"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script src="script.js"></script>
     <script>
         (async () => {
-            const ok = await initApp();
-            if (!ok) return; // already redirected to entry.html
-            loadReviews();
+            try {
+                const ok = await initApp();
+                if (!ok) return; // already redirected to entry.html
+                loadReviews();
+            } catch (err) {
+                console.error(err);
+                const box = document.getElementById('error-msg');
+                box.style.display = 'block';
+                box.textContent = 'Error loading page:\n' + (err && err.message ? err.message : String(err));
+            }
         })();
     </script>
 </body>

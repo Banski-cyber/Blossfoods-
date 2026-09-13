@@ -19,6 +19,7 @@
     </nav>
 
     <div id="loading-msg" style="padding:40px 5%; text-align:center; opacity:0.7;">Loading shop...</div>
+    <div id="error-msg" style="display:none; padding:40px 5%; text-align:center; color:#ff8a8a; font-size:0.85rem; white-space:pre-wrap;"></div>
 
     <div id="shop-content" style="display:none;">
         <div style="padding:20px 5% 0; display:flex; gap:15px; flex-wrap:wrap;">
@@ -79,13 +80,21 @@
         }
 
         (async () => {
-            const ok = await initApp();
-            if (!ok) return; // already redirected to entry.html
+            try {
+                const ok = await initApp();
+                if (!ok) return; // already redirected to entry.html
 
-            document.getElementById('loading-msg').style.display = 'none';
-            document.getElementById('shop-content').style.display = 'block';
-            buildCategoryChips();
-            renderShop();
+                document.getElementById('loading-msg').style.display = 'none';
+                document.getElementById('shop-content').style.display = 'block';
+                buildCategoryChips();
+                renderShop();
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading-msg').style.display = 'none';
+                const box = document.getElementById('error-msg');
+                box.style.display = 'block';
+                box.textContent = 'Error loading shop:\n' + (err && err.message ? err.message : String(err));
+            }
         })();
     </script>
 </body>
