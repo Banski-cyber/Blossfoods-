@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Review | Bloss Foods</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav>
+        <div class="logo">BLOSS <span>FOODS</span></div>
+        <a href="shop.html" style="color: var(--gold); text-decoration: none; font-size: 0.8rem;">← Back to Shop</a>
+    </nav>
+
+    <div class="checkout-wrapper">
+        <div class="order-review-container">
+            <h3 style="color: var(--gold); text-align: center; margin-bottom: 15px;">Order Review</h3>
+
+            <div id="checkout-items-list"></div>
+
+            <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); pt-10">
+                <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                    <span>Subtotal:</span>
+                    <span id="order-subtotal">₦0</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; color: var(--gold-bright);">
+                    <small>Delivery Fee:</small>
+                    <small id="delivery-fee-display">Calculating...</small>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 10px; font-weight: bold; font-size: 1.2rem; color: var(--gold);">
+                    <span>Total:</span>
+                    <span id="order-final-total">₦0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="delivery-details-container">
+            <h3 style="color: var(--gold); text-align: center;">Delivery Details</h3>
+            <p style="font-size: 0.65rem; color: var(--gold-bright); text-align: center; margin-bottom: 15px;">
+                * FREE for school hostels. ₦500 for off-campus.
+            </p>
+
+            <label style="font-size: 0.8rem;">Your Name</label>
+            <input type="text" id="cust-name" placeholder="Enter your name">
+
+            <label style="font-size: 0.8rem;">Detailed Address (Hostel & Room No)</label>
+            <textarea id="cust-address" rows="3" placeholder="e.g. Mandela Hostel, Room 202" oninput="calculateTotal()"></textarea>
+
+            <button class="confirm-btn" id="confirm-btn" onclick="handleConfirm()">Confirm on WhatsApp</button>
+        </div>
+    </div>
+
+    <div id="ai-chat-trigger" onclick="toggleChat()" style="position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); background: #c5a059; color: black; padding: 10px 25px; border-radius: 15px 15px 0 0; font-weight: bold; cursor: pointer; z-index: 3000;">
+        💬 Ask Bloss AI
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="script.js"></script>
+    <script>
+        function displayOrder() {
+            const listContainer = document.getElementById('checkout-items-list');
+            let subtotal = 0;
+
+            if (cart.length === 0) {
+                listContainer.innerHTML = "<p style='text-align:center; opacity:0.5;'>Your basket is empty!</p>";
+            } else {
+                listContainer.innerHTML = cart.map(item => {
+                    subtotal += itemTotal(item);
+                    return `
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 0;">
+                        <span>${item.qty}x ${cartItemLabel(item)}</span>
+                        <span style="font-size: 0.9rem;">₦${itemTotal(item).toLocaleString()}</span>
+                    </div>`;
+                }).join('');
+            }
+
+            document.getElementById('order-subtotal').innerText = `₦${subtotal.toLocaleString()}`;
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const address = document.getElementById('cust-address').value.toLowerCase();
+            const subtotal = cart.reduce((sum, item) => sum + itemTotal(item), 0);
+
+            const offCampusKeywords = ['camp', 'oluwo', 'isolu', 'harmony', 'accord', 'kofesu'];
+            let fee = 0;
+            if (address !== "") {
+                const isOffCampus = offCampusKeywords.some(keyword => address.includes(keyword));
+                fee = isOffCampus ? 500 : 0;
+            }
+
+            document.getElementById('delivery-fee-display').innerText = fee === 0 ? "FREE" : `₦${fee}`;
+            document.getElementById('order-final-total').innerText = `₦${(subtotal + fee).toLocaleString()}`;
+        }
+
+        async function handleConfirm() {
+            const name = document.getElementById('cust-name').value.trim();
+            const address = document.getElementById('cust-address').value.trim();
+            const btn = document.getElementById('confirm-btn');
+            btn.disabled = true;
+            btn.textContent = 'Placing order...';
+
+            await sendOrder(name, address);
+
+            btn.disabled = false;
+            btn.textContent = 'Confirm on WhatsApp';
+            displayOrder(); // cart is now empty on success
+        }
+
+        (async () => {
+            const ok = await initApp();
+            if (!ok) return; // already redirected to entry.html
+            displayOrder();
+        })();
+    </script>
+</body>
+</html>

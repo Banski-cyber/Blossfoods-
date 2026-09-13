@@ -1,0 +1,165 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap');
+
+:root {
+    --midnight: #1a0505;
+    --wine-deep: #4a0e0e;
+    --gold: #c5a059;
+    --gold-bright: #f1d592;
+    --soft-white: #e0e0e0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* UPDATED: Added flex and min-height so the background covers the whole screen */
+body { 
+    font-family: 'Poppins', sans-serif; 
+    background: var(--midnight); 
+    color: var(--soft-white); 
+    line-height: 1.6; 
+    min-height: 100vh; 
+    display: flex;
+    flex-direction: column;
+}
+
+nav { background: var(--midnight); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gold); position: sticky; top:0; z-index:100; }
+.logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; }
+.logo span { color: var(--gold); }
+
+/* UPDATED: Added flex: 1 so the grid expands to push footer/bottom content down */
+.product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 30px 5%; flex: 1; }
+.card {
+    background: var(--wine-deep); padding: 20px; border-radius: 15px; text-align: center;
+    border: 1px solid rgba(197, 160, 89, 0.2); position: relative;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    animation: cardIn 0.35s ease both;
+}
+.card:hover { transform: translateY(-5px); box-shadow: 0 12px 28px rgba(0,0,0,0.45); border-color: var(--gold); }
+.card.out-of-stock { opacity: 0.5; filter: grayscale(0.4); }
+.card.out-of-stock:hover { transform: none; box-shadow: none; }
+@keyframes cardIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.category-tag { display: inline-block; font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); opacity: 0.75; margin-bottom: 6px; }
+.price-tag { color: var(--gold-bright); font-size: 1.3rem; font-weight: 600; margin: 10px 0; }
+
+.qty-input { width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--gold); color: white; border-radius: 5px; outline: none; }
+.add-btn { background: var(--gold); color: black; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; }
+.add-btn:hover { background: var(--gold-bright); }
+.add-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+
+/* Favorite heart button */
+.fav-btn {
+    position: absolute; top: 12px; right: 12px; background: none; border: none;
+    font-size: 1.4rem; line-height: 1; cursor: pointer; color: var(--soft-white);
+    opacity: 0.55; transition: transform 0.2s, opacity 0.2s, color 0.2s;
+}
+.fav-btn:hover { opacity: 0.9; transform: scale(1.1); }
+.fav-btn.active { color: #ff5577; opacity: 1; }
+
+/* Quantity stepper */
+.qty-stepper { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.qty-stepper input { text-align: center; margin-bottom: 0; }
+.qty-stepper button {
+    width: 38px; height: 38px; flex-shrink: 0; border-radius: 8px; border: 1px solid var(--gold);
+    background: rgba(0,0,0,0.3); color: var(--gold-bright); font-size: 1.2rem; cursor: pointer;
+    transition: background 0.2s;
+}
+.qty-stepper button:hover { background: rgba(197,160,89,0.25); }
+.qty-stepper button:disabled { cursor: not-allowed; opacity: 0.4; }
+
+/* Category filter chips */
+.category-chips { display: flex; gap: 8px; flex-wrap: wrap; padding: 15px 5% 0; }
+.chip {
+    padding: 8px 16px; border-radius: 20px; border: 1px solid var(--gold); background: transparent;
+    color: var(--soft-white); cursor: pointer; font-size: 0.82rem; white-space: nowrap;
+    transition: background 0.2s, color 0.2s;
+}
+.chip:hover { background: rgba(197,160,89,0.15); }
+.chip.active { background: var(--gold); color: var(--midnight); font-weight: 600; }
+
+/* Search bar with icon */
+.search-wrap { position: relative; flex: 1; min-width: 200px; }
+.search-wrap input { padding-left: 38px; margin-bottom: 0; }
+.search-wrap .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.6; pointer-events: none; }
+
+/* Toast notifications */
+#toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 5000; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.toast-msg {
+    background: var(--wine-deep); border: 1px solid var(--gold); color: var(--soft-white);
+    padding: 12px 20px; border-radius: 10px; font-size: 0.9rem; box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    animation: toastIn 0.25s ease, toastOut 0.3s ease 2.3s forwards; max-width: 90vw; text-align: center;
+}
+.toast-msg.toast-error { border-color: #ff5577; color: #ffb3c1; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(-10px); } }
+
+.cart-sidebar { position: fixed; right: -350px; top: 0; width: 320px; height: 100%; background: var(--midnight); border-left: 1px solid var(--gold); padding: 20px; transition: 0.3s; z-index: 200; overflow-y:auto; }
+.cart-sidebar.active { right: 0; }
+
+/* AI Chatbot Specific Styles */
+.chat-container { display: none; position: fixed; bottom: 100px; right: 25px; width: 320px; background: var(--midnight); border: 1px solid var(--gold); border-radius: 15px; overflow: hidden; z-index: 3000; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+#chat-box { height: 250px; padding: 15px; overflow-y: auto; font-size: 0.9rem; background: #000; color: #fff; text-align: left; }
+.chat-btn { position: fixed; bottom: 25px; right: 25px; background: var(--gold); border: none; width: 60px; height: 60px; border-radius: 50%; cursor: pointer; z-index: 3001; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+/* --- NEW: Checkout & Review Page Layout --- */
+/* Add these classes to your HTML elements on the order page */
+
+.checkout-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 5%;
+    width: 100%;
+    flex: 1; /* Pushes content to fill space between nav and bottom of the screen */
+}
+
+/* Targets the boxes seen in your screenshot */
+.order-review-container, .delivery-details-container {
+    width: 100%;
+    max-width: 600px; /* Limits width on desktop for readability while taking 100% on mobile */
+    background: var(--wine-deep);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(197, 160, 89, 0.3);
+}
+
+/* Specific styling for inputs in the delivery section to fill the box */
+.delivery-details-container input, 
+.delivery-details-container textarea {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--gold);
+    color: white;
+    padding: 12px;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+}
+
+.delivery-details-container input:focus, 
+.delivery-details-container textarea:focus {
+    border-color: var(--gold-bright);
+}
+
+/* Ensures the WhatsApp button is prominent and fills the width */
+.confirm-btn {
+    width: 100%;
+    background: var(--gold);
+    color: var(--midnight);
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: 0.3s;
+    margin-top: 15px;
+}
+
+.confirm-btn:hover {
+    background: var(--gold-bright);
+}

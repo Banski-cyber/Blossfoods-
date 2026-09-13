@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In | Bloss Foods</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-wrap { max-width: 380px; margin: 10vh auto; padding: 30px 5%; }
+        .auth-card { background: var(--wine-deep); border: 1px solid rgba(197,160,89,0.3); border-radius: 15px; padding: 30px; }
+        .auth-card h2 { color: var(--gold-bright); margin-bottom: 5px; text-align: center; }
+        .auth-card p.subtitle { text-align: center; opacity: 0.7; font-size: 0.85rem; margin-bottom: 20px; }
+        .auth-card label { display: block; font-size: 0.8rem; margin-bottom: 6px; opacity: 0.85; }
+        .auth-card input { width: 100%; padding: 12px; margin-bottom: 16px; background: rgba(0,0,0,0.3); border: 1px solid var(--gold); color: white; border-radius: 8px; outline: none; box-sizing: border-box; }
+        .toggle-link { display: block; text-align: center; margin-top: 16px; color: var(--gold); font-size: 0.85rem; cursor: pointer; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="auth-wrap">
+        <div class="auth-card">
+            <h2 class="logo" style="justify-content:center; display:flex;">BLOSS <span>FOODS</span></h2>
+            <p class="subtitle" id="form-title">Welcome Back</p>
+
+            <form id="auth-form" onsubmit="handleAuth(event)">
+                <div id="signup-fields" style="display:none;">
+                    <label for="auth-name">Full Name</label>
+                    <input type="text" id="auth-name" placeholder="Your full name">
+                    <label for="auth-phone">Phone Number</label>
+                    <input type="tel" id="auth-phone" placeholder="080...">
+                </div>
+
+                <label for="auth-email">Email</label>
+                <input type="email" id="auth-email" placeholder="you@example.com" required>
+
+                <label for="auth-password">Password</label>
+                <input type="password" id="auth-password" placeholder="••••••••" minlength="6" required>
+
+                <button type="submit" id="submit-btn" class="add-btn">Log In</button>
+            </form>
+
+            <span class="toggle-link" id="toggle-link" onclick="setMode(mode === 'login' ? 'signup' : 'login')">New here? Create an account</span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        let mode = 'login';
+
+        function setMode(m) {
+            mode = m;
+            document.getElementById('signup-fields').style.display = m === 'signup' ? 'block' : 'none';
+            document.getElementById('form-title').textContent = m === 'signup' ? 'Create Your Account' : 'Welcome Back';
+            document.getElementById('submit-btn').textContent = m === 'signup' ? 'Sign Up' : 'Log In';
+            document.getElementById('toggle-link').textContent = m === 'signup' ? 'Already have an account? Log in' : "New here? Create an account";
+        }
+
+        async function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+
+            try {
+                if (mode === 'signup') {
+                    const fullName = document.getElementById('auth-name').value.trim();
+                    const phone = document.getElementById('auth-phone').value.trim();
+                    if (!fullName || !phone) {
+                        alert('Please fill in your name and phone number.');
+                        btn.disabled = false;
+                        return;
+                    }
+                    const { error } = await supabase.auth.signUp({
+                        email, password,
+                        options: { data: { full_name: fullName, phone } }
+                    });
+                    if (error) throw error;
+                    alert('Account created! If email confirmation is on, check your inbox — otherwise you can log in now.');
+                    setMode('login');
+                } else {
+                    const { error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    window.location.href = 'index.html';
+                }
+            } catch (err) {
+                alert(err.message || 'Something went wrong. Please try again.');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Already logged in? Skip straight to the shop.
+        (async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) window.location.href = 'index.html';
+        })();
+    </script>
+</body>
+</html>

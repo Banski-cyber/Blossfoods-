@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop | Bloss Foods</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">BLOSS <span>FOODS</span></div>
+        <div style="display:flex; gap:15px; align-items:center;">
+            <a href="index.html" style="color:var(--soft-white); text-decoration:none; font-size:0.9rem;">Home</a>
+            <a href="#" id="staff-link" onclick="openAdmin(); return false;" style="display:none; color:var(--gold-bright); text-decoration:none; font-size:0.9rem;">Staff Panel</a>
+            <span id="account-name" style="font-size:0.8rem; opacity:0.7;"></span>
+            <button onclick="logout()" style="background:none; border:1px solid var(--gold); color:var(--soft-white); border-radius:6px; padding:6px 12px; font-size:0.8rem; cursor:pointer;">Log Out</button>
+            <button onclick="toggleCart()" class="add-btn" style="width:auto; padding:10px 20px;">Basket (<span id="cart-count">0</span>)</button>
+        </div>
+    </nav>
+
+    <div id="loading-msg" style="padding:40px 5%; text-align:center; opacity:0.7;">Loading shop...</div>
+
+    <div id="shop-content" style="display:none;">
+        <div style="padding:20px 5% 0; display:flex; gap:15px; flex-wrap:wrap;">
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-box" placeholder="Search products..." class="qty-input" oninput="handleSearch(this.value)">
+            </div>
+        </div>
+
+        <div class="category-chips" id="category-chips"></div>
+
+        <div class="product-grid" id="product-grid"></div>
+    </div>
+
+    <div id="cart-sidebar" class="cart-sidebar">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 style="color:var(--gold-bright);">Your Basket</h3>
+            <button onclick="toggleCart()" style="background:none; border:none; color:white; font-size:2rem; cursor:pointer;">&times;</button>
+        </div>
+        <div id="side-cart-items"></div>
+        <div style="border-top:1px solid var(--gold); margin-top:20px; padding-top:20px;">
+            <h4>Total: ₦<span id="side-total">0</span></h4>
+            <a href="checkout.html" class="add-btn" style="display:block; text-align:center; text-decoration:none; margin-top:15px;">Proceed to Checkout</a>
+        </div>
+    </div>
+
+    <!-- Staff inventory panel, only revealed for accounts with role = 'staff' -->
+    <div id="admin-panel" style="display:none; padding:20px 5%;">
+        <h3 style="color:var(--gold-bright);">Staff Inventory Control</h3>
+        <p style="font-size:0.85rem; opacity:0.7;">Edits sync to every device — staff and customers — instantly.</p>
+        <div class="product-grid" id="admin-list"></div>
+        <button id="save-inv-btn" class="add-btn" style="max-width:300px;" onclick="saveInv()">Save Inventory</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="script.js"></script>
+    <script>
+        window.currentCategory = 'All';
+        window.currentSearch = '';
+
+        function handleSearch(val) {
+            window.currentSearch = val;
+            renderShop(window.currentCategory, window.currentSearch);
+        }
+
+        function selectCategory(cat) {
+            window.currentCategory = cat;
+            document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.cat === cat));
+            renderShop(window.currentCategory, window.currentSearch);
+        }
+
+        function buildCategoryChips() {
+            const categories = ['All', ...new Set(PRODUCTS.map(p => p.category)), 'Favorites'];
+            document.getElementById('category-chips').innerHTML = categories.map(c =>
+                `<button class="chip ${c === 'All' ? 'active' : ''}" data-cat="${c}" onclick="selectCategory('${c}')">${c === 'Favorites' ? '♥ Favorites' : c}</button>`
+            ).join('');
+        }
+
+        (async () => {
+            const ok = await initApp();
+            if (!ok) return; // already redirected to entry.html
+
+            document.getElementById('loading-msg').style.display = 'none';
+            document.getElementById('shop-content').style.display = 'block';
+            buildCategoryChips();
+            renderShop();
+        })();
+    </script>
+</body>
+</html>
